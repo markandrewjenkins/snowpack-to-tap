@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>
+    // Apply saved theme and design skin before first paint (?skin=alt|classic overrides and is remembered)
+    (function () { try { var r = document.documentElement, q = new URLSearchParams(location.search).get("skin");
+      var t = localStorage.getItem("odp-theme"); if (t) r.dataset.theme = t;
+      if (q) localStorage.setItem("odp-skin", q);
+      if ((q || localStorage.getItem("odp-skin")) === "alt") r.dataset.skin = "alt"; } catch (e) {} })();
+  </script>
+  <title>Snowpack to Tap</title>
+  <meta name="description" content="Following water from mountain snowpack to the tap: Lake Mead and Lake Powell projections, a Colorado River inflow forecast, and California's reservoirs and snowpack, all from open government data." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💧</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;550;600;650;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Limelight&family=Jost:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./src/shared/theme.css" />
+  <link rel="stylesheet" href="./src/water/water.css" />
+  <link rel="stylesheet" href="./src/water/skin.css" />
+</head>
+<body class="water">
+  <header class="topbar">
+    <span class="title">Snowpack to Tap</span>
+    <span class="spacer"></span>
+    <button class="skin-btn" id="skin" type="button" data-skin-name="Hoover Deco"></button>
+    <button class="icon-btn" id="theme" type="button"></button>
+  </header>
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <div class="eyebrow" id="asof">The American Southwest's water, today</div>
+        <h1 class="hero-title">Snowpack to tap</h1>
+        <p class="lede">Most of the water in Phoenix, Las Vegas, Los Angeles and San Diego starts as snow in the Rockies and the Sierra Nevada. This page follows it downhill into the two biggest reservoirs in the country and California's dams, and forecasts what's coming.</p>
+        <div class="grid cols-4 tiles" id="tiles"></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="wrap">
+        <div class="section-head"><div>
+          <div class="eyebrow">Next 12–15 months</div>
+          <h2>Where are Lake Powell and Lake Mead heading?</h2>
+          <p>Each thin line replays one past year's rise and fall, starting from today's storage. Together they show the range of futures this year's water could follow. The shaded band holds 80% of them.</p>
+        </div></div>
+        <div class="grid cols-2">
+          <div class="card"><h3 class="card-title">Lake Powell</h3><div class="risk" id="risk-powell"></div><div class="legend" id="leg-powell"></div><div class="chart" id="proj-powell"></div></div>
+          <div class="card"><h3 class="card-title">Lake Mead</h3><div class="risk" id="risk-mead"></div><div class="legend" id="leg-mead"></div><div class="chart" id="proj-mead"></div></div>
+        </div>
+        <p class="note" style="margin-top:8px">Analogs carry the release rules of their own year, so they show what the water and weather of past years would do. They don't show what new operating rules will do. The shortage tiers are those of the 2007 Interim Guidelines, which govern operations through 2026.</p>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="wrap">
+        <div class="section-head"><div>
+          <div class="eyebrow">Forecast model</div>
+          <h2>How much water will reach Lake Powell next spring?</h2>
+          <p>Nearly all of Lake Powell's inflow arrives between April and July as Rocky Mountain snow melts. Drag the slider to set April 1 snowpack across 137 Upper Colorado SNOTEL sites, and the model gives the expected April–July inflow.</p>
+        </div></div>
+        <div class="grid cols-2">
+          <div class="card">
+            <div class="slider-row"><label for="swe">April 1 snowpack</label><b id="swe-label">100% of median</b></div>
+            <input type="range" id="swe" min="40" max="180" value="100" step="5" />
+            <div class="forecast-out">
+              <div class="big" id="inflow-big">—</div>
+              <div class="note" id="inflow-sub"></div>
+            </div>
+            <div class="chart" id="inflow-dist"></div>
+            <p class="note" id="inflow-analogs"></p>
+          </div>
+          <div class="card">
+            <h3 class="card-title">How good is it?</h3>
+            <p class="note card-sub">Average error of each forecast date, out of sample (leave-one-year-out, 1987–2026), against simply guessing the median year. Labels show how often the real inflow fell inside the 80% range.</p>
+            <div class="legend" id="skill-legend"></div>
+            <div class="chart" id="skill"></div>
+            <h3 class="card-title" style="margin-top:14px">April 1 forecasts vs what happened</h3>
+            <div class="chart" id="inflow-scatter"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="wrap">
+        <div class="section-head"><div>
+          <div class="eyebrow">Snow</div>
+          <h2>The snow seasons</h2>
+          <p>Average snow water equivalent at long-record SNOTEL sites through the water year (October–September), against the 1991–2020 range.</p>
+        </div></div>
+        <div class="grid cols-2">
+          <div class="card"><h3 class="card-title">Upper Colorado (feeds Lake Powell)</h3><div class="legend" id="leg-uc"></div><div class="chart" id="snow-uc"></div></div>
+          <div class="card"><h3 class="card-title">Sierra Nevada (feeds California)</h3><div class="legend" id="leg-si"></div><div class="chart" id="snow-si"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="wrap">
+        <div class="section-head"><div>
+          <div class="eyebrow">California</div>
+          <h2>California's big reservoirs, today</h2>
+          <p>Each cup is filled to the reservoir's current storage. The line marks its 1991–2020 average for this date.</p>
+        </div></div>
+        <div class="card"><div class="teacups" id="teacups"></div></div>
+        <div class="card" style="margin-top:16px">
+          <h3 class="card-title">Twelve reservoirs combined</h3>
+          <p class="note card-sub">Total storage, million acre-feet, against the 1991–2020 range for each date.</p>
+          <div class="legend" id="leg-ca"></div>
+          <div class="chart" id="ca-total"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="wrap">
+        <div class="section-head"><div>
+          <div class="eyebrow">The long view</div>
+          <h2>Ninety years of Lake Mead</h2>
+          <p>Monthly elevation since Hoover Dam began filling in 1935, with Lake Powell from 1964. The lines mark the shortage tiers and power pools.</p>
+        </div>
+        <div class="seg" id="long-lake" role="group" aria-label="Lake"></div></div>
+        <div class="card"><div class="chart" id="long"></div></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="wrap">
+        <div class="grid cols-2">
+          <div class="card prose">
+            <h3>Method</h3>
+            <p><b>Snow index.</b> The ratio of summed snow water equivalent to summed 1991–2020 medians for the same day, across SNOTEL sites with records back to the mid-1980s. This mirrors the NRCS basin index.</p>
+            <p><b>Inflow forecast.</b> Log April–July unregulated inflow to Lake Powell is regressed on that day's snow index, the water-year precipitation index and the previous autumn's baseflow, with one model per forecast date. It's validated leave-one-year-out, and the prediction intervals come from the cross-validated errors.</p>
+            <p><b>Lake projections.</b> Each year since 2000, I take the lake's storage change from today's calendar date over the next 12–15 months, add it to today's storage, and convert to elevation with the lake's recent storage–elevation curve.</p>
+            <p><b>California.</b> CDEC daily storage for the 12 largest reservoirs, compared with their 1991–2020 average within ±3 days of the date.</p>
+          </div>
+          <div class="card prose">
+            <h3>Honest limitations</h3>
+            <ul>
+              <li>Operations matter. Releases from Powell and Mead follow negotiated rules that changed in 2007 and 2019 and are being renegotiated for 2027 onward, so analog years replay old rules on today's water.</li>
+              <li>The inflow model has about 40 seasons to learn from. A snowpack outside that range (below about 50% or above about 160%) is an extrapolation.</li>
+              <li>Spring weather (dust on snow, a hot dry May) can move inflow by a million acre-feet after April 1. That's why the error never drops to zero.</li>
+              <li>SNOTEL sites sit at mid-to-high elevations. The Sierra index here is not DWR's official statewide index.</li>
+            </ul>
+            <h3 style="margin-top:16px">Data sources</h3>
+            <ul class="sources">
+              <li><a href="https://data.usbr.gov/rise/">US Bureau of Reclamation RISE</a>: Lake Mead and Lake Powell elevation, storage and inflow</li>
+              <li><a href="https://wcc.sc.egov.usda.gov/awdbRestApi/">USDA NRCS SNOTEL (AWDB REST API)</a>: snow water equivalent and precipitation</li>
+              <li><a href="https://cdec.water.ca.gov/">California Data Exchange Center (DWR)</a>: reservoir storage</li>
+            </ul>
+            <p class="note" id="generated"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="site"><div class="wrap">Snowpack to Tap is part of an open-data portfolio. Data refreshes daily.</div></footer>
+  <script type="module" src="./src/water/main.js"></script>
+</body>
+</html>

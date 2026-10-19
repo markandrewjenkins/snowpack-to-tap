@@ -1,0 +1,483 @@
+/* "Hoover Deco" design skin for this page. Every rule is scoped under :root[data-skin="alt"].
+   1930s Bureau-of-Reclamation Art Deco and WPA park posters: cream poster stock, deco teal, navy ink,
+   brass and terracotta; Limelight display, Jost tracked caps, DM Mono numerals; stepped ziggurat corners,
+   sunbursts, chevron dividers and engraved-brass plaques. Night is the dam lit after dark. */
+
+/* ============================================================ tokens */
+:root[data-skin="alt"] {
+  color-scheme: light;
+  --page: #f2e9d6;
+  --surface: #f8f2e3;
+  --surface-2: #ece1c8;
+  --ink: #1b2433;
+  --ink-2: #3d4656;
+  --muted: #655f50;
+  --grid: #d6c9aa;
+  --axis: #7d8590;      /* cool slate so reference bars read apart from brass */
+  --border: rgba(176, 133, 58, 0.55);
+  --shadow: none;
+  --radius: 0px;
+  --font: "Jost", "Futura", "Century Gothic", system-ui, sans-serif;
+  --mono: "DM Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+  /* deco palette */
+  --teal: #1f5a60;
+  --navy: #1b2433;
+  --brass: #b0853a;
+  --brass-ink: #7d5b1c;      /* brass for text on cream (5.5:1) */
+  --brass-hi: #d9b46a;       /* engraved brass on navy plaques */
+  --terra: #bf5b39;
+  --frame: #b0853a;
+  --frame-2: rgba(176, 133, 58, 0.6);
+  --plaque: #1b2433;
+  --plaque-ink: #efe6d2;
+  --plaque-sub: #c9c0ab;
+  --bar: #1f5a60;
+  --bar-ink: #f6eedc;
+  --ray: rgba(176, 133, 58, 0.22);
+  --glow: none;
+  --strip: #1b2433;
+  --zig: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 14'%3E%3Cg fill='none' stroke='%23b0853a' stroke-width='1.6'%3E%3Cpath d='M48 2 43 7 48 12M40 2 35 7 40 12M32 2 27 7 32 12M72 2 77 7 72 12M80 2 85 7 80 12M88 2 93 7 88 12'/%3E%3C/g%3E%3Cpath d='M60 1 66 7 60 13 54 7Z' fill='%23bf5b39'/%3E%3C/svg%3E");
+}
+:root[data-skin="alt"] body.water {
+  --accent: #1f5a60; --accent-2: #b04f2c;
+  --water: #1f5a60;   /* deco teal (was blue)        7.0:1 on card */
+  --snow: #8f6a24;    /* forecast brass (was indigo)  4.4:1 on card */
+  --warm: #b04f2c;    /* terracotta (was orange)      4.7:1 on card */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="alt"]:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #111925;
+    --surface: #172131;
+    --surface-2: #1e2a3c;
+    --ink: #f0e7d3;
+    --ink-2: #cbc2ad;
+    --muted: #9aa0a8;
+    --grid: #2a3647;
+    --axis: #6f7a8a;
+    --border: rgba(201, 163, 90, 0.45);
+    --brass: #c9a35a;
+    --brass-ink: #d6b26a;
+    --brass-hi: #e2c07a;
+    --terra: #e57c52;
+    --frame: rgba(201, 163, 90, 0.85);
+    --frame-2: rgba(201, 163, 90, 0.38);
+    --plaque: #0b111a;
+    --plaque-ink: #f0e7d3;
+    --plaque-sub: #b9b3a5;
+    --bar: #1d4a50;
+    --bar-ink: #f0e7d3;
+    --ray: rgba(214, 178, 106, 0.13);
+    --glow: 0 0 14px rgba(226, 180, 100, 0.35);
+    --strip: #0b111a;
+    --zig: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 14'%3E%3Cg fill='none' stroke='%23c9a35a' stroke-width='1.6'%3E%3Cpath d='M48 2 43 7 48 12M40 2 35 7 40 12M32 2 27 7 32 12M72 2 77 7 72 12M80 2 85 7 80 12M88 2 93 7 88 12'/%3E%3C/g%3E%3Cpath d='M60 1 66 7 60 13 54 7Z' fill='%23e57c52'/%3E%3C/svg%3E");
+  }
+  :root[data-skin="alt"]:not([data-theme="light"]) body.water {
+    --accent: #62b9b3; --accent-2: #e57c52;
+    --water: #62b9b3; --snow: #d6aa5c; --warm: #e57c52;
+  }
+}
+:root[data-skin="alt"][data-theme="dark"] {
+  color-scheme: dark;
+  --page: #111925;
+  --surface: #172131;
+  --surface-2: #1e2a3c;
+  --ink: #f0e7d3;
+  --ink-2: #cbc2ad;
+  --muted: #9aa0a8;
+  --grid: #2a3647;
+  --axis: #6f7a8a;
+  --border: rgba(201, 163, 90, 0.45);
+  --brass: #c9a35a;
+  --brass-ink: #d6b26a;
+  --brass-hi: #e2c07a;
+  --terra: #e57c52;
+  --frame: rgba(201, 163, 90, 0.85);
+  --frame-2: rgba(201, 163, 90, 0.38);
+  --plaque: #0b111a;
+  --plaque-ink: #f0e7d3;
+  --plaque-sub: #b9b3a5;
+  --bar: #1d4a50;
+  --bar-ink: #f0e7d3;
+  --ray: rgba(214, 178, 106, 0.13);
+  --glow: 0 0 14px rgba(226, 180, 100, 0.35);
+  --strip: #0b111a;
+  --zig: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 14'%3E%3Cg fill='none' stroke='%23c9a35a' stroke-width='1.6'%3E%3Cpath d='M48 2 43 7 48 12M40 2 35 7 40 12M32 2 27 7 32 12M72 2 77 7 72 12M80 2 85 7 80 12M88 2 93 7 88 12'/%3E%3C/g%3E%3Cpath d='M60 1 66 7 60 13 54 7Z' fill='%23e57c52'/%3E%3C/svg%3E");
+}
+:root[data-skin="alt"][data-theme="dark"] body.water {
+  --accent: #62b9b3; --accent-2: #e57c52;
+  --water: #62b9b3; --snow: #d6aa5c; --warm: #e57c52;
+}
+
+/* ============================================================ base type */
+:root[data-skin="alt"] body.water { font: 15.5px/1.6 var(--font); font-feature-settings: normal; }
+:root[data-skin="alt"] body.water h1,
+:root[data-skin="alt"] body.water h2 { font-family: "Limelight", var(--font); font-weight: 400; letter-spacing: 0.01em; }
+:root[data-skin="alt"] body.water ::selection { background: var(--brass); color: var(--navy); }
+
+/* ============================================================ top bar */
+:root[data-skin="alt"] body.water .topbar {
+  background: color-mix(in oklab, var(--page) 92%, transparent);
+  border-bottom: 0; padding-bottom: 16px; gap: 14px;
+}
+/* flat deco tri-band rule (teal / brass / terracotta) */
+:root[data-skin="alt"] body.water .topbar::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 7px; pointer-events: none;
+  background: linear-gradient(to bottom, var(--water) 0 2px, transparent 2px 3px, var(--brass) 3px 4px, transparent 4px 5px, var(--warm) 5px 7px);
+}
+/* one-shot light sweep along the rule */
+:root[data-skin="alt"] body.water .topbar::before {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 7px; pointer-events: none; z-index: 1;
+  background: linear-gradient(90deg, transparent, rgba(255, 244, 214, 0.95), transparent) no-repeat;
+  background-size: 240px 100%; background-position: -240px 0; opacity: 0;
+  animation: deco-sweep 2.2s cubic-bezier(.4, 0, .2, 1) .35s 1 both;
+}
+@keyframes deco-sweep { 0% { background-position: -240px 0; opacity: 1; } 90% { opacity: 1; } 100% { background-position: calc(100% + 240px) 0; opacity: 0; } }
+:root[data-skin="alt"] body.water .topbar .crumb {
+  font-size: 11.5px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2);
+}
+:root[data-skin="alt"] body.water .topbar .title {
+  font-family: "Limelight", var(--font); font-weight: 400; font-size: 16px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink);
+}
+:root[data-skin="alt"] body.water .icon-btn,
+:root[data-skin="alt"] body.water .skin-btn {
+  border-radius: 0; border: 1px solid var(--frame); background: var(--surface);
+  box-shadow: inset 0 0 0 2px var(--surface), inset 0 0 0 3px var(--frame-2);
+}
+:root[data-skin="alt"] body.water .skin-btn {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink); height: 34px; padding: 0 13px;
+}
+:root[data-skin="alt"] body.water .icon-btn:hover,
+:root[data-skin="alt"] body.water .skin-btn:hover { background: var(--surface-2); color: var(--ink); }
+:root[data-skin="alt"] body.water .skin-dot {
+  border-radius: 50%;
+  background: repeating-conic-gradient(var(--brass) 0 15deg, var(--water) 15deg 30deg);
+  box-shadow: 0 0 0 1px var(--frame);
+}
+
+/* ============================================================ live strip (skin.js) */
+:root[data-skin="alt"] body.water .deco-strip {
+  background: var(--strip); color: #efe6d2; border-bottom: 1px solid var(--brass);
+  box-shadow: inset 0 -3px 0 var(--strip), inset 0 -4px 0 rgba(201, 163, 90, 0.5);
+  font-family: var(--mono);
+}
+.deco-strip .ds-in { display: flex; align-items: stretch; gap: 0; max-width: 1240px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); }
+.deco-strip .ds-item { display: flex; flex-direction: column; justify-content: center; padding: 9px 18px 10px; min-width: 0;
+  border-left: 3px double rgba(201, 163, 90, 0.55); }
+.deco-strip .ds-item:first-child { border-left: 0; padding-left: 0; }
+.deco-strip .ds-k { font-family: var(--font); font-size: 10px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: #d6b26a; white-space: nowrap; }
+.deco-strip .ds-v { font-size: 15px; font-weight: 500; color: #f4ecd9; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.deco-strip .ds-s { font-size: 10.5px; color: #b9b3a5; white-space: nowrap; }
+.deco-strip .ds-v .up { color: #8fd0c9; }
+.deco-strip .ds-live { flex-direction: row; align-items: center; gap: 9px; }
+.deco-strip .ds-dot { width: 9px; height: 9px; flex: none; transform: rotate(45deg); background: #e2c07a;
+  box-shadow: 0 0 0 2px rgba(226, 192, 122, 0.25); animation: deco-pulse 2.4s ease-in-out infinite; }
+@keyframes deco-pulse { 0%, 100% { box-shadow: 0 0 0 2px rgba(226, 192, 122, 0.25); } 50% { box-shadow: 0 0 0 5px rgba(226, 192, 122, 0); opacity: .75; } }
+.deco-strip .ds-asof { margin-left: auto; border-left: 3px double rgba(201, 163, 90, 0.55); text-align: right; }
+
+/* ============================================================ hero */
+:root[data-skin="alt"] body.water .hero {
+  position: relative; overflow: hidden; padding: 64px 0 46px;
+  background: var(--page);
+  border-bottom: 1px solid var(--frame);
+}
+/* stepped dam-crest frieze along the hero's foot */
+:root[data-skin="alt"] body.water .hero::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 14px; pointer-events: none;
+  background: var(--water);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 14'%3E%3Cpath d='M0 14V11H4V8H8V5H12V2H16V5H20V8H24V11H28V14Z'/%3E%3C/svg%3E") 0 100% / 28px 14px repeat-x;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 14'%3E%3Cpath d='M0 14V11H4V8H8V5H12V2H16V5H20V8H24V11H28V14Z'/%3E%3C/svg%3E") 0 100% / 28px 14px repeat-x;
+}
+:root[data-skin="alt"] body.water .hero > .wrap { position: relative; }
+:root[data-skin="alt"] body.water .hero .eyebrow {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.24em; color: var(--brass-ink);
+  display: inline-flex; align-items: center; gap: 12px;
+}
+:root[data-skin="alt"] body.water .hero .eyebrow::before,
+:root[data-skin="alt"] body.water .hero .eyebrow::after {
+  content: ""; width: 34px; height: 4px; border-top: 1px solid var(--brass); border-bottom: 1px solid var(--brass);
+}
+:root[data-skin="alt"] body.water .hero-title {
+  position: relative; isolation: isolate; display: inline-block;
+  font-size: clamp(40px, 7vw, 84px); line-height: 1; margin: 22px 0 22px; padding: 0 4px;
+  text-transform: uppercase; letter-spacing: 0.03em; color: var(--ink);
+  text-shadow: 3px 3px 0 var(--brass); text-wrap: balance;
+}
+/* sunburst of rays behind the title */
+:root[data-skin="alt"] body.water .hero-title::before {
+  content: ""; position: absolute; z-index: -1; left: 50%; bottom: -26px; width: 980px; height: 420px; transform: translateX(-50%);
+  pointer-events: none;
+  background: repeating-conic-gradient(from -90deg at 50% 100%, var(--ray) 0 3.2deg, transparent 3.2deg 9deg);
+  -webkit-mask: radial-gradient(ellipse farthest-side at 50% 100%, transparent 22%, #000 23%, #000 55%, transparent 100%);
+          mask: radial-gradient(ellipse farthest-side at 50% 100%, transparent 22%, #000 23%, #000 55%, transparent 100%);
+}
+/* half-sun disc at the rays' origin */
+:root[data-skin="alt"] body.water .hero-title::after {
+  content: ""; position: absolute; z-index: -1; left: 50%; bottom: -26px; width: 200px; height: 100px; transform: translateX(-50%);
+  border-radius: 100px 100px 0 0; pointer-events: none;
+  background: repeating-linear-gradient(to bottom, var(--ray) 0 6px, transparent 6px 10px);
+}
+:root[data-skin="alt"] body.water .lede { font-size: 18px; line-height: 1.6; color: var(--ink-2); max-width: 62ch; }
+:root[data-skin="alt"] body.water .tiles { margin-top: 34px; gap: 14px; }
+
+/* WPA-poster badge (skin.js) */
+.deco-badge { display: none; }
+:root[data-skin="alt"] body.water .deco-badge {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  position: absolute; right: clamp(16px, 4vw, 40px); top: -24px; width: 196px; padding: 26px 16px 14px;
+  background: var(--water); color: #f4ecd9;
+  border: 3px double var(--brass); border-radius: 98px 98px 0 0;
+  box-shadow: 6px 6px 0 var(--brass);
+  font-family: var(--font); transform: rotate(2.5deg);
+}
+:root[data-skin="alt"] body.water .deco-badge svg { width: 110px; height: auto; color: #e2c07a; margin-bottom: 8px; }
+:root[data-skin="alt"] body.water .deco-badge .b1 { font-family: "Limelight", var(--font); font-size: 14px; letter-spacing: 0.08em; line-height: 1.15; text-transform: uppercase; }
+:root[data-skin="alt"] body.water .deco-badge .b2 { font-size: 9.5px; font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; color: #e2c07a;
+  border-top: 1px solid rgba(226, 192, 122, 0.6); border-bottom: 1px solid rgba(226, 192, 122, 0.6); padding: 4px 0 3px; margin-top: 8px; width: 100%; }
+:root[data-skin="alt"] body.water .deco-badge .b3 { font-size: 9px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; margin-top: 7px; opacity: 0.85; }
+
+/* ============================================================ section heads + chevron dividers */
+:root[data-skin="alt"] body.water section.block { padding-top: 44px; }
+:root[data-skin="alt"] body.water section.block > .wrap::before {
+  content: ""; display: block; height: 14px; margin-bottom: 34px;
+  background:
+    var(--zig) center / 120px 14px no-repeat,
+    linear-gradient(var(--brass), var(--brass)) left 0 top 5px / calc(50% - 66px) 1px no-repeat,
+    linear-gradient(var(--brass), var(--brass)) left 0 top 8px / calc(50% - 66px) 1px no-repeat,
+    linear-gradient(var(--brass), var(--brass)) right 0 top 5px / calc(50% - 66px) 1px no-repeat,
+    linear-gradient(var(--brass), var(--brass)) right 0 top 8px / calc(50% - 66px) 1px no-repeat;
+}
+:root[data-skin="alt"] body.water .eyebrow { font-family: var(--font); font-size: 11.5px; font-weight: 600; letter-spacing: 0.22em; color: var(--brass-ink); }
+:root[data-skin="alt"] body.water .section-head .eyebrow::before { content: "\25C6"; color: var(--warm); margin-right: 9px; font-size: 9px; vertical-align: 1px; }
+:root[data-skin="alt"] body.water .section-head h2 { font-size: clamp(25px, 3vw, 34px); line-height: 1.12; margin-top: 10px; color: var(--ink); }
+:root[data-skin="alt"] body.water .section-head p { color: var(--ink-2); font-size: 15.5px; margin-top: 10px; }
+:root[data-skin="alt"] body.water .section-head { margin-bottom: 24px; }
+
+/* ============================================================ cards: stepped ziggurat corners + double rule */
+:root[data-skin="alt"] body.water .card {
+  --g: linear-gradient(var(--frame), var(--frame));
+  position: relative; border-radius: 0; box-shadow: none; padding: 22px;
+  border: 1px solid var(--frame);
+  outline: 1px solid var(--frame-2); outline-offset: -6px;
+  background-color: var(--surface);
+  background-image: var(--g), var(--g), var(--g), var(--g), var(--g), var(--g), var(--g), var(--g);
+  background-repeat: no-repeat; background-origin: border-box;
+  background-position: left 0 top 10px, left 10px top 0, right 0 top 10px, right 10px top 0,
+                       left 0 bottom 10px, left 10px bottom 0, right 0 bottom 10px, right 10px bottom 0;
+  background-size: 6px 1px, 1px 6px, 6px 1px, 1px 6px, 6px 1px, 1px 6px, 6px 1px, 1px 6px;
+  clip-path: polygon(0 10px, 5px 10px, 5px 5px, 10px 5px, 10px 0,
+    calc(100% - 10px) 0, calc(100% - 10px) 5px, calc(100% - 5px) 5px, calc(100% - 5px) 10px, 100% 10px,
+    100% calc(100% - 10px), calc(100% - 5px) calc(100% - 10px), calc(100% - 5px) calc(100% - 5px), calc(100% - 10px) calc(100% - 5px), calc(100% - 10px) 100%,
+    10px 100%, 10px calc(100% - 5px), 5px calc(100% - 5px), 5px calc(100% - 10px), 0 calc(100% - 10px));
+}
+/* tinted uppercase header bar inside the inner rule */
+:root[data-skin="alt"] body.water .card > .card-title:first-child,
+:root[data-skin="alt"] body.water .card.prose > h3:first-child {
+  margin: -17px -17px 14px; padding: 10px 17px 9px;
+  background: var(--bar); color: var(--bar-ink);
+  font-family: var(--font); font-size: 12.5px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; line-height: 1.3;
+  display: flex; align-items: center; gap: 10px;
+}
+:root[data-skin="alt"] body.water .card > .card-title:first-child::before,
+:root[data-skin="alt"] body.water .card.prose > h3:first-child::before {
+  content: ""; width: 14px; height: 9px; flex: none; background: var(--brass-hi);
+  clip-path: polygon(0 100%, 0 66%, 3px 66%, 3px 33%, 6px 33%, 6px 0, 8px 0, 8px 33%, 11px 33%, 11px 66%, 14px 66%, 14px 100%);
+}
+:root[data-skin="alt"] body.water .card > .card-title:first-child::after,
+:root[data-skin="alt"] body.water .card.prose > h3:first-child::after {
+  content: ""; flex: 1; min-width: 20px; height: 4px; margin-left: 6px;
+  border-top: 1px solid rgba(226, 192, 122, 0.55); border-bottom: 1px solid rgba(226, 192, 122, 0.55);
+}
+/* secondary titles inside a card */
+:root[data-skin="alt"] body.water .card > .card-title:not(:first-child),
+:root[data-skin="alt"] body.water .card.prose > h3:not(:first-child) {
+  font-family: var(--font); font-size: 12px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink);
+  padding-bottom: 6px; margin-bottom: 8px; border-bottom: 3px double var(--frame-2);
+}
+:root[data-skin="alt"] body.water .card-sub,
+:root[data-skin="alt"] body.water .note { color: var(--muted); font-size: 13px; }
+
+/* ============================================================ KPI tiles = engraved brass plaques */
+:root[data-skin="alt"] body.water .tile {
+  --frame: #b0853a; --frame-2: rgba(217, 180, 106, 0.55);
+  background-color: var(--plaque); color: var(--plaque-ink);
+  padding: 20px 20px 18px;
+  background-image: var(--g), var(--g), var(--g), var(--g), var(--g), var(--g), var(--g), var(--g),
+    radial-gradient(circle, var(--brass-hi) 0 1.6px, transparent 2.2px), radial-gradient(circle, var(--brass-hi) 0 1.6px, transparent 2.2px),
+    radial-gradient(circle, var(--brass-hi) 0 1.6px, transparent 2.2px), radial-gradient(circle, var(--brass-hi) 0 1.6px, transparent 2.2px);
+  background-position: left 0 top 10px, left 10px top 0, right 0 top 10px, right 10px top 0,
+                       left 0 bottom 10px, left 10px bottom 0, right 0 bottom 10px, right 10px bottom 0,
+                       left 9px top 9px, right 9px top 9px, left 9px bottom 9px, right 9px bottom 9px;
+  background-size: 6px 1px, 1px 6px, 6px 1px, 1px 6px, 6px 1px, 1px 6px, 6px 1px, 1px 6px, 8px 8px, 8px 8px, 8px 8px, 8px 8px;
+}
+:root[data-skin="alt"] body.water .tile .label {
+  font-size: 10.5px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--brass-hi);
+  padding-bottom: 8px; border-bottom: 1px solid rgba(217, 180, 106, 0.35); margin: 0 4px;
+}
+:root[data-skin="alt"] body.water .tile .value {
+  font-family: var(--mono); font-weight: 500; font-size: 33px; letter-spacing: -0.02em; color: var(--brass-hi);
+  margin: 10px 4px 4px; line-height: 1.1;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.55), 0 1px 0 rgba(255, 236, 190, 0.18), var(--glow);
+}
+:root[data-skin="alt"] body.water .tile .sub { font-size: 12.5px; line-height: 1.45; color: var(--plaque-sub); margin: 0 4px; }
+
+/* risk readouts = little gauge plaques */
+:root[data-skin="alt"] body.water .risk { gap: 10px; margin: 6px 0 12px; }
+:root[data-skin="alt"] body.water .risk .r {
+  border-radius: 0; background: var(--surface-2); border-left: 3px solid var(--warm);
+  box-shadow: inset 0 1px 0 var(--frame-2), inset 0 -1px 0 var(--frame-2), inset -1px 0 0 var(--frame-2);
+  padding: 9px 12px 10px;
+}
+:root[data-skin="alt"] body.water .risk .r b { font-family: var(--mono); font-weight: 500; font-size: 23px; color: var(--ink); }
+:root[data-skin="alt"] body.water .risk .r span { font-size: 12px; color: var(--ink-2); line-height: 1.4; display: block; }
+
+/* ============================================================ forecaster */
+:root[data-skin="alt"] body.water .slider-row label { font-size: 11.5px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink); }
+:root[data-skin="alt"] body.water .slider-row b { font-family: var(--mono); font-weight: 500; color: var(--snow); font-size: 16px; }
+:root[data-skin="alt"] body.water #swe {
+  -webkit-appearance: none; appearance: none; height: 26px; background: transparent; margin: 12px 0 6px; cursor: pointer;
+}
+:root[data-skin="alt"] body.water #swe::-webkit-slider-runnable-track {
+  height: 12px; border: 1px solid var(--frame);
+  background: repeating-linear-gradient(90deg, var(--frame-2) 0 1px, transparent 1px 10%), var(--surface-2);
+}
+:root[data-skin="alt"] body.water #swe::-moz-range-track {
+  height: 12px; border: 1px solid var(--frame);
+  background: repeating-linear-gradient(90deg, var(--frame-2) 0 1px, transparent 1px 10%), var(--surface-2);
+}
+:root[data-skin="alt"] body.water #swe::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 26px; margin-top: -8px; border: 0;
+  background: var(--snow); box-shadow: inset 0 0 0 2px var(--surface), inset 0 0 0 3px var(--snow), var(--glow);
+  clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
+}
+:root[data-skin="alt"] body.water #swe::-moz-range-thumb {
+  width: 16px; height: 26px; border: 0; border-radius: 0; background: var(--snow);
+  clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
+}
+:root[data-skin="alt"] body.water #swe:focus-visible { outline: 2px solid var(--water); outline-offset: 3px; }
+:root[data-skin="alt"] body.water .forecast-out { margin: 14px 0 8px; }
+:root[data-skin="alt"] body.water .forecast-out .big {
+  display: inline-block; font-family: var(--mono); font-weight: 500; font-size: clamp(22px, 3.2vw, 32px); letter-spacing: -0.02em;
+  background: var(--plaque); color: var(--brass-hi); padding: 10px 20px 9px; margin-bottom: 8px;
+  border: 3px double #b0853a; outline: 1px solid var(--frame-2); outline-offset: 2px;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.55), var(--glow);
+}
+
+/* ============================================================ teacups */
+:root[data-skin="alt"] body.water .teacups { gap: 22px 12px; }
+:root[data-skin="alt"] body.water .cup .n {
+  font-size: 11.5px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink);
+  border-top: 3px double var(--frame-2); padding-top: 6px; margin: 4px 10px 2px;
+}
+:root[data-skin="alt"] body.water .cup svg path:first-of-type { stroke: var(--brass) !important; stroke-width: 2px !important; }
+:root[data-skin="alt"] body.water .cup .s { font-family: var(--mono); font-size: 11px; color: var(--ink-2); }
+
+/* ============================================================ segmented control, legends, charts */
+:root[data-skin="alt"] body.water .seg { border-radius: 0; padding: 3px; gap: 3px; background: var(--surface); border: 1px solid var(--frame); }
+:root[data-skin="alt"] body.water .seg button {
+  border-radius: 0; font-size: 11.5px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; padding: 7px 14px; color: var(--ink-2);
+}
+:root[data-skin="alt"] body.water .seg button[aria-pressed="true"] { background: var(--water); color: var(--page); box-shadow: none; }
+:root[data-skin="alt"] body.water .legend { font-size: 12.5px; gap: 6px 18px; color: var(--ink-2); }
+:root[data-skin="alt"] body.water .legend .line { height: 3px; border-radius: 0; width: 20px; }
+:root[data-skin="alt"] body.water .legend .band { border-radius: 0; }
+:root[data-skin="alt"] body.water .chart .grid line { stroke-dasharray: 1 3; }
+:root[data-skin="alt"] body.water .chart .axis text,
+:root[data-skin="alt"] body.water .chart .tick text { font-family: var(--mono); font-size: 10.5px; }
+:root[data-skin="alt"] body.water .chart .label { font-family: var(--font); }
+:root[data-skin="alt"] body.water .chart .label.strong { font-weight: 600; letter-spacing: 0.02em; }
+:root[data-skin="alt"] body.water .chart svg { transition: filter .25s; }
+:root[data-skin="alt"] body.water .chart:hover svg { filter: drop-shadow(0 0 0.5px var(--frame-2)); }
+
+/* ============================================================ tooltip */
+:root[data-skin="alt"] .tooltip {
+  border-radius: 0; border: 1px solid var(--frame); background: var(--surface);
+  box-shadow: inset 0 0 0 3px var(--surface), inset 0 0 0 4px var(--frame-2), 4px 4px 0 color-mix(in oklab, var(--brass) 45%, transparent);
+  padding: 10px 13px; font-family: var(--font);
+}
+:root[data-skin="alt"] .tooltip .t-title { font-size: 10.5px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--brass-ink); }
+:root[data-skin="alt"] .tooltip .t-row b { font-family: var(--mono); font-weight: 500; }
+:root[data-skin="alt"] .tooltip .t-key { height: 3px; border-radius: 0; }
+
+/* ============================================================ prose + footer */
+:root[data-skin="alt"] body.water .prose p,
+:root[data-skin="alt"] body.water .prose ul { font-size: 14.5px; color: var(--ink-2); }
+:root[data-skin="alt"] body.water .prose ul { list-style: none; padding-left: 0; }
+:root[data-skin="alt"] body.water .prose li { position: relative; padding-left: 18px; }
+:root[data-skin="alt"] body.water .prose li::before { content: "\25C6"; position: absolute; left: 0; top: 0; font-size: 8px; line-height: 2.6; color: var(--warm); }
+:root[data-skin="alt"] body.water .prose b { color: var(--ink); font-weight: 600; }
+:root[data-skin="alt"] body.water .sources a { text-decoration-color: var(--brass); text-decoration-thickness: 1px; }
+:root[data-skin="alt"] body.water #generated { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.02em; }
+:root[data-skin="alt"] body.water footer.site {
+  text-align: center; padding: 34px 0 56px; margin-top: 40px; color: var(--muted);
+  font-size: 11.5px; letter-spacing: 0.18em; text-transform: uppercase;
+  border-top: 1px solid var(--frame); box-shadow: inset 0 3px 0 var(--page), inset 0 4px 0 var(--frame);
+}
+:root[data-skin="alt"] body.water footer.site .deco-flavour {
+  display: block; margin-top: 10px; font-family: "Limelight", var(--font); font-size: 14px; letter-spacing: 0.08em; text-transform: none; color: var(--brass-ink);
+}
+
+/* ============================================================ night extras: the dam lit after dark */
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="alt"]:not([data-theme="light"]) body.water .hero-title { color: #f4ecd9; text-shadow: 3px 3px 0 #7a5e2a, 0 0 28px rgba(226, 180, 100, 0.28); }
+  :root[data-skin="alt"]:not([data-theme="light"]) body.water .hero { background: radial-gradient(700px 300px at 30% 62%, rgba(201, 163, 90, 0.10), transparent 70%), var(--page); }
+  :root[data-skin="alt"]:not([data-theme="light"]) body.water .tile,
+  :root[data-skin="alt"]:not([data-theme="light"]) body.water .forecast-out .big { box-shadow: 0 0 22px rgba(201, 163, 90, 0.10); }
+  :root[data-skin="alt"]:not([data-theme="light"]) body.water .seg button[aria-pressed="true"] { color: #0b111a; }
+  :root[data-skin="alt"]:not([data-theme="light"]) body.water .deco-badge { background: #1d4a50; box-shadow: 6px 6px 0 #7a5e2a, 0 0 30px rgba(201, 163, 90, 0.18); }
+}
+:root[data-skin="alt"][data-theme="dark"] body.water .hero-title { color: #f4ecd9; text-shadow: 3px 3px 0 #7a5e2a, 0 0 28px rgba(226, 180, 100, 0.28); }
+:root[data-skin="alt"][data-theme="dark"] body.water .hero { background: radial-gradient(700px 300px at 30% 62%, rgba(201, 163, 90, 0.10), transparent 70%), var(--page); }
+:root[data-skin="alt"][data-theme="dark"] body.water .tile,
+:root[data-skin="alt"][data-theme="dark"] body.water .forecast-out .big { box-shadow: 0 0 22px rgba(201, 163, 90, 0.10); }
+:root[data-skin="alt"][data-theme="dark"] body.water .seg button[aria-pressed="true"] { color: #0b111a; }
+:root[data-skin="alt"][data-theme="dark"] body.water .deco-badge { background: #1d4a50; box-shadow: 6px 6px 0 #7a5e2a, 0 0 30px rgba(201, 163, 90, 0.18); }
+
+/* ============================================================ mobile */
+@media (max-width: 860px) {
+  :root[data-skin="alt"] body.water .deco-strip .ds-in { display: grid; grid-template-columns: 1fr 1fr; padding-top: 4px; padding-bottom: 4px; }
+  :root[data-skin="alt"] body.water .deco-strip .ds-item { padding: 6px 10px; border-left: 0; border-top: 1px solid rgba(201, 163, 90, 0.3); }
+  :root[data-skin="alt"] body.water .deco-strip .ds-item:nth-child(-n+2) { border-top: 0; }
+  :root[data-skin="alt"] body.water .deco-strip .ds-item:nth-child(even) { border-left: 3px double rgba(201, 163, 90, 0.45); }
+  :root[data-skin="alt"] body.water .deco-strip .ds-asof { margin-left: 0; text-align: left; }
+  :root[data-skin="alt"] body.water .deco-strip .ds-v,
+  :root[data-skin="alt"] body.water .deco-strip .ds-s,
+  :root[data-skin="alt"] body.water .deco-strip .ds-k { white-space: normal; }
+  :root[data-skin="alt"] body.water .deco-badge {
+    position: relative; right: auto; top: auto; transform: none; width: auto; max-width: 100%;
+    display: inline-grid; grid-template-columns: auto auto; column-gap: 12px; align-items: center;
+    padding: 8px 18px 8px 12px; border-radius: 40px 0 0 40px; margin-bottom: 22px; text-align: left; box-shadow: 4px 4px 0 var(--brass);
+  }
+  :root[data-skin="alt"] body.water .deco-badge svg { width: 54px; margin: 0; grid-row: span 2; }
+  :root[data-skin="alt"] body.water .deco-badge .b1 { white-space: nowrap; font-size: 13px; }
+  :root[data-skin="alt"] body.water .deco-badge .b2 { margin-top: 5px; padding: 3px 0 2px; }
+  :root[data-skin="alt"] body.water .deco-badge .b3 { display: none; }
+}
+@media (max-width: 640px) {
+  :root[data-skin="alt"] body.water .topbar { gap: 8px; }
+  :root[data-skin="alt"] body.water .topbar .title { font-size: 13px; letter-spacing: 0.04em; }
+  :root[data-skin="alt"] body.water .topbar .crumb { font-size: 0; }
+  :root[data-skin="alt"] body.water .topbar .crumb::before { content: "\2190  Projects"; font-size: 10.5px; }
+  :root[data-skin="alt"] body.water .skin-btn { letter-spacing: 0.08em; padding: 0 9px; }
+  :root[data-skin="alt"] body.water .skin-btn span:last-child { max-width: none; }
+  :root[data-skin="alt"] body.water .hero { padding: 36px 0 40px; }
+  :root[data-skin="alt"] body.water .hero-title { font-size: 40px; margin: 16px 0 18px; text-shadow: 2px 2px 0 var(--brass); }
+  :root[data-skin="alt"] body.water .hero-title::before { width: 620px; height: 300px; }
+  :root[data-skin="alt"] body.water .hero .eyebrow { font-size: 10.5px; letter-spacing: 0.16em; gap: 8px; }
+  :root[data-skin="alt"] body.water .hero .eyebrow::before,
+  :root[data-skin="alt"] body.water .hero .eyebrow::after { width: 16px; }
+  :root[data-skin="alt"] body.water .lede { font-size: 16px; }
+  :root[data-skin="alt"] body.water .card { padding: 18px; }
+  :root[data-skin="alt"] body.water .card > .card-title:first-child,
+  :root[data-skin="alt"] body.water .card.prose > h3:first-child { margin: -13px -13px 12px; padding: 9px 13px 8px; font-size: 11.5px; }
+  :root[data-skin="alt"] body.water .tile .value { font-size: 29px; }
+  :root[data-skin="alt"] body.water .teacups { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :root[data-skin="alt"] body.water section.block > .wrap::before { margin-bottom: 26px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-skin="alt"] body.water .topbar::before { animation: none; display: none; }
+  :root[data-skin="alt"] body.water .deco-strip .ds-dot { animation: none; }
+  :root[data-skin="alt"] body.water .chart svg { transition: none; }
+}
