@@ -1,14 +1,17 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-page="water">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
-    // Apply saved theme and design skin before first paint (?skin=alt|classic overrides and is remembered)
+    // Apply saved theme and design skin before first paint. <html data-skins="alt herbarium …"> lists this page's
+    // themed designs; ?skin=<id>|classic overrides and is remembered. "alt" is shared across pages; other ids per page.
     (function () { try { var r = document.documentElement, q = new URLSearchParams(location.search).get("skin");
       var t = localStorage.getItem("odp-theme"); if (t) r.dataset.theme = t;
-      if (q) localStorage.setItem("odp-skin", q);
-      if ((q || localStorage.getItem("odp-skin")) === "alt") r.dataset.skin = "alt"; } catch (e) {} })();
+      var multi = !!r.dataset.skins, ok = (r.dataset.skins || "alt").split(" "), pk = "odp-skin:" + (r.dataset.page || location.pathname);
+      if (q) { if (multi) localStorage.setItem(pk, q); if (q === "alt" || q === "classic") localStorage.setItem("odp-skin", q); }
+      var s = q || (multi && localStorage.getItem(pk)) || localStorage.getItem("odp-skin");
+      if (ok.indexOf(s) >= 0) r.dataset.skin = s; } catch (e) {} })();
   </script>
   <title>Snowpack to Tap</title>
   <meta name="description" content="Following water from mountain snowpack to the tap: Lake Mead and Lake Powell projections, a Colorado River inflow forecast, and California's reservoirs and snowpack, all from open government data." />
@@ -35,6 +38,46 @@
         <h1 class="hero-title">Snowpack to tap</h1>
         <p class="lede">Most of the water in Phoenix, Las Vegas, Los Angeles and San Diego starts as snow in the Rockies and the Sierra Nevada. This page follows it downhill into the two biggest reservoirs in the country and California's dams, and forecasts what's coming.</p>
         <div class="grid cols-4 tiles" id="tiles"></div>
+      </div>
+    </section>
+
+    <section class="block map-block">
+      <div class="wrap">
+        <div class="section-head"><div>
+          <div class="eyebrow">The journey</div>
+          <h2>From mountain snow to the tap</h2>
+          <p>Snow piles up at the SNOTEL sites in the Rockies and the Sierra, melts into the Green, the San Juan, the Colorado, the Sacramento and the San Joaquin, fills the reservoirs, and aqueducts carry it to the cities. Hover a site or a reservoir. Click a reservoir to fly there and highlight its chart below.</p>
+        </div></div>
+        <div class="card wmap">
+          <div class="wmap-body">
+            <div class="wmap-canvas"><div id="wmap" role="region" aria-label="Map of snowpack, rivers, reservoirs and aqueducts"></div>
+              <div class="wm-cupkey" aria-hidden="true">
+                <svg viewBox="-2 -2 40 32" width="34" height="27"><path class="wm-cup-body" d="M8,28L0,0L36,0L28,28Z"/><path class="wm-cup-fill" d="M8,28L3.4,12L32.6,12L28,28Z"/><line class="wm-cup-avg" x1="-1" x2="37" y1="7" y2="7"/><path class="wm-cup-rim" d="M8,28L0,0L36,0L28,28Z"/></svg>
+                <span><b>Reservoirs</b> filled to today's storage · bar: 1991–2020 average for the date · size: capacity</span>
+              </div>
+            </div>
+            <aside class="wmap-side" aria-label="Map controls and legend">
+              <div class="ws-sec wm-sel" id="wm-sel" hidden></div>
+              <div class="ws-sec">
+                <div class="ws-title">Snowpack vs the 1991–2020 median</div>
+                <div class="seg" id="wm-when" role="group" aria-label="Snowpack date"></div>
+                <div class="wm-ramp" id="wm-ramp"></div>
+                <p class="wm-fine" id="wm-when-note"></p>
+              </div>
+              <div class="ws-sec">
+                <div class="ws-title">Scenario: next spring's snowpack</div>
+                <div class="slider-row"><label for="wm-swe">April 1, Upper Colorado</label><b id="wm-swe-label">100% of median</b></div>
+                <input type="range" id="wm-swe" min="40" max="180" value="100" step="5" />
+                <div id="wm-scen"></div>
+              </div>
+              <div class="ws-sec">
+                <div class="ws-title">Layers</div>
+                <ul class="wm-layers" id="wm-layers"></ul>
+              </div>
+            </aside>
+          </div>
+        </div>
+        <p class="note" style="margin-top:8px">Sources: USDA NRCS SNOTEL, Reclamation RISE and CDEC for the readings; USGS Watershed Boundary Dataset for basins; Natural Earth for rivers; OpenStreetMap contributors for the aqueducts and basemap (OpenFreeMap).</p>
       </div>
     </section>
 
@@ -149,6 +192,8 @@
               <li><a href="https://data.usbr.gov/rise/">US Bureau of Reclamation RISE</a>: Lake Mead and Lake Powell elevation, storage and inflow</li>
               <li><a href="https://wcc.sc.egov.usda.gov/awdbRestApi/">USDA NRCS SNOTEL (AWDB REST API)</a>: snow water equivalent and precipitation</li>
               <li><a href="https://cdec.water.ca.gov/">California Data Exchange Center (DWR)</a>: reservoir storage</li>
+              <li><a href="https://www.usgs.gov/national-hydrography/watershed-boundary-dataset">USGS Watershed Boundary Dataset</a>: basin outlines (HUC 14, 15, 1802, 1804)</li>
+              <li><a href="https://www.naturalearthdata.com/">Natural Earth</a>: rivers · <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>: aqueducts · <a href="https://openfreemap.org">OpenFreeMap</a>: basemap</li>
             </ul>
             <p class="note" id="generated"></p>
           </div>

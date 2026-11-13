@@ -31,3 +31,25 @@ MEAD_LEVELS = [(1075, "Tier 1 shortage"), (1050, "Tier 2a"), (1045, "Tier 2b"), 
 POWELL_LEVELS = [(3525, "Protection buffer"), (3490, "Minimum power pool"), (3370, "Dead pool")]
 FULL_POOL = {"mead": 1229, "powell": 3700}
 ANALOG_FROM = 2000           # analog years for the 12-month projections
+
+# ---------------------------------------------------------------- map (snowpack → rivers → reservoirs → taps)
+MAP_BBOX = (-125.0, 30.5, -104.0, 44.5)           # west, south, east, north
+# USGS Watershed Boundary Dataset (public domain): HUC2 Upper/Lower Colorado, HUC4 Sacramento and San Joaquin
+WBD = "https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer"
+WBD_UNITS = [(1, "huc2", ["14", "15"]), (2, "huc4", ["1802", "1804"])]
+# Natural Earth 1:10m rivers (public domain)
+NE_RIVERS = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_rivers_lake_centerlines.geojson"
+MAP_RIVERS = ["Colorado", "Green", "San Juan", "Sacramento", "San Joaquin"]
+# OpenStreetMap waterway relations (ODbL) for the big delivery aqueducts
+AQUEDUCTS = {3343336: "California Aqueduct", 2528360: "Colorado River Aqueduct", 8513255: "Central Arizona Project"}
+# Lake Powell and Lake Mead for the map: dam coordinates (USGS GNIS: Glen Canyon Dam, Hoover Dam) and live capacity
+# at full pool (Reclamation: Powell 24.32 MAF at 3,700 ft, Mead 26.12 MAF at 1,229 ft; recent sediment surveys
+# trim both by a few percent, so % full here is approximate).
+LAKES = {"powell": ("Lake Powell", 24_322_000, -111.4846, 36.9375), "mead": ("Lake Mead", 26_120_000, -114.7377, 36.0160)}
+# "Taps": big cities at the end of the delivery system, for map context only (city-centre coordinates; the
+# supply links are each utility's own descriptions: SNWA, Central Arizona Project, Metropolitan Water District).
+TAPS = [("Las Vegas", -115.14, 36.17, "Lake Mead, through SNWA's intakes"),
+        ("Phoenix", -112.07, 33.45, "the Colorado River, through the Central Arizona Project"),
+        ("Tucson", -110.97, 32.22, "the Colorado River, through the Central Arizona Project"),
+        ("Los Angeles", -118.24, 34.05, "the Colorado River Aqueduct and the State Water Project's California Aqueduct"),
+        ("San Diego", -117.16, 32.72, "the Colorado River Aqueduct and the State Water Project's California Aqueduct")]

@@ -1,4 +1,5 @@
-// "Hoover Deco" skin extras: a gauge-reading live strip, a WPA-poster hero badge and a footer flavour line.
+// "Hoover Deco" skin extras: a gauge-reading live strip, a WPA-poster hero badge, a footer flavour line and a
+// survey-sheet tint for the journey map's basemap (cream poster stock by day, the dam at night).
 // Built only while the alt skin is active; removed on switch back. Uses only data main.js already loaded.
 
 const root = document.documentElement;
@@ -20,6 +21,8 @@ const on = () => root.dataset.skin === "alt";
 export function skinData(patch) { Object.assign(S, patch); sync(); }
 
 window.addEventListener("skinchange", sync);
+// map.js tints the basemap for Classic on every style load, then hands the map over here
+window.addEventListener("water:basemap", (e) => tint(e.detail.map));
 sync();
 
 function sync() {
@@ -88,4 +91,33 @@ function fill() {
   const g = new Date(W.generated);
   set("asof", "Data as of", g.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
     g.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }).toUpperCase());
+}
+
+// ------------------------------------------------------------------ journey-map basemap: survey sheet
+const SHEET = {
+  day: { bg: "#ebe1c9", water: "#b5cac5", green: "#e2d6b8", resid: "#e0d3b5", road: "#d3c19b", bound: "#b0853a", label: "#5b5040", halo: "#ebe1c9" },
+  night: { bg: "#0f1722", water: "#1a2c3a", green: "#121c28", resid: "#151f2c", road: "#24324a", bound: "#7a6334", label: "#b9b3a5", halo: "#0f1722" },
+};
+const dark = () => (root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches);
+function tint(map) {
+  if (!on() || !map?.getStyle) return;     // Classic: map.js's own tint already ran
+  const P = dark() ? SHEET.night : SHEET.day;
+  for (const l of map.getStyle()?.layers || []) {
+    const id = l.id;
+    const set = (prop, v) => { try { map.setPaintProperty(id, prop, v); } catch { /* absent in this style */ } };
+    if (id === "wm-aqueducts-casing") set("line-color", P.bg);
+    else if (id === "wm-river-labels") set("text-halo-color", P.halo);
+    else if (id === "wm-stations" && dark()) set("circle-stroke-color", P.bg);
+    else if (id.startsWith("wm-")) continue;
+    else if (l.type === "background") set("background-color", P.bg);
+    else if (l.type === "fill") {
+      if (/water/.test(id)) set("fill-color", P.water);
+      else if (/park|wood|grass|glacier|ice/.test(id)) set("fill-color", P.green);
+      else if (/residential|building|aeroway/.test(id)) set("fill-color", P.resid);
+    } else if (l.type === "line") {
+      if (/waterway/.test(id)) set("line-color", P.water);
+      else if (/boundary/.test(id)) set("line-color", P.bound);
+      else if (/highway|road|tunnel|railway|aeroway/.test(id)) set("line-color", P.road);
+    } else if (l.type === "symbol") { set("text-color", P.label); set("text-halo-color", P.halo); }
+  }
 }

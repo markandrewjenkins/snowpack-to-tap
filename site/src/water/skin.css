@@ -390,6 +390,81 @@
 :root[data-skin="alt"] body.water .chart svg { transition: filter .25s; }
 :root[data-skin="alt"] body.water .chart:hover svg { filter: drop-shadow(0 0 0.5px var(--frame-2)); }
 
+/* ============================================================ journey map: a framed survey sheet */
+/* snowpack ramp in terracotta → poster cream → deco teal (ends ≥3:1 on the tinted sheet, day and night) */
+:root[data-skin="alt"] body.water { --snow-dry: #9c3f1a; --snow-mid: #d8ccb2; --snow-wet: #185a60; }
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="alt"]:not([data-theme="light"]) body.water { --snow-dry: #ec8558; --snow-mid: #8a877d; --snow-wet: #5fc0b8; }
+}
+:root[data-skin="alt"][data-theme="dark"] body.water { --snow-dry: #ec8558; --snow-mid: #8a877d; --snow-wet: #5fc0b8; }
+:root[data-skin="alt"] body.water .card.wmap { padding: 10px; }
+:root[data-skin="alt"] body.water .wmap-body { border: 1px solid var(--frame); }
+:root[data-skin="alt"] body.water .wmap-side { border-left: 3px double var(--frame-2); gap: 20px; }
+:root[data-skin="alt"] body.water .ws-title {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--brass-ink);
+  padding-bottom: 5px; border-bottom: 3px double var(--frame-2);
+}
+:root[data-skin="alt"] body.water .wm-fine { font-size: 12.5px; }
+:root[data-skin="alt"] body.water #wm-when button { padding: 6px 10px; letter-spacing: 0.1em; }
+:root[data-skin="alt"] body.water .wm-ramp-bar { border-radius: 0; height: 12px; box-shadow: none; border: 1px solid var(--frame); }
+:root[data-skin="alt"] body.water .wm-ramp-ticks { font-family: var(--mono); font-size: 10.5px; }
+:root[data-skin="alt"] body.water .wm-layers label { font-size: 13.5px; }
+:root[data-skin="alt"] body.water .wm-scen-out b { font-family: var(--mono); font-weight: 500; }
+:root[data-skin="alt"] body.water .wm-sel {
+  border-radius: 0; background: var(--plaque); color: var(--plaque-ink); border: 3px double #b0853a; margin: 0;
+}
+:root[data-skin="alt"] body.water .wm-sel .ws-title { color: var(--brass-hi); border-bottom-color: rgba(217, 180, 106, 0.4); }
+:root[data-skin="alt"] body.water .wm-sel-name { font-family: "Limelight", var(--font); font-weight: 400; font-size: 19px; letter-spacing: 0.04em; }
+:root[data-skin="alt"] body.water .wm-sel-rows b { font-family: var(--mono); font-weight: 500; color: var(--brass-hi); }
+:root[data-skin="alt"] body.water .wm-sel-rows span { color: var(--plaque-sub); }
+:root[data-skin="alt"] body.water .wm-btn {
+  border-radius: 0; border: 1px solid #b0853a; background: transparent; color: var(--plaque-ink);
+  font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+}
+:root[data-skin="alt"] body.water .wm-btn.primary { background: #b0853a; color: #1b2433; }
+:root[data-skin="alt"] body.water .wm-cupkey { border-radius: 0; border: 1px solid var(--frame); box-shadow: inset 0 0 0 2px var(--surface), inset 0 0 0 3px var(--frame-2); }
+:root[data-skin="alt"] body.water .wm-cup-rim { stroke: var(--brass); stroke-width: 1.7; }
+:root[data-skin="alt"] body.water .wm-res-name { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; }
+:root[data-skin="alt"] body.water .wm-res.big .wm-res-name {
+  background: var(--plaque); color: var(--brass-hi); text-shadow: none; padding: 3px 7px 2px; border: 1px solid #b0853a; margin-top: 4px;
+}
+:root[data-skin="alt"] body.water .wm-res.big .wm-res-name span { color: var(--plaque-sub); font-family: var(--mono); letter-spacing: 0; text-transform: none; }
+:root[data-skin="alt"] body.water .wm-basin-label { font-family: "Limelight", var(--font); font-weight: 400; font-size: 12.5px; letter-spacing: 0.1em; color: var(--brass-ink); opacity: 0.9; }
+:root[data-skin="alt"] body.water .wm-basin-label small { font-family: var(--mono); letter-spacing: 0.04em; }
+:root[data-skin="alt"] body.water .wm-tap i { background: var(--warm); }
+:root[data-skin="alt"] body.water .wm-linked { outline-color: var(--warm); animation-name: wm-pulse-deco; }
+@keyframes wm-pulse-deco { 0%, 100% { outline-color: var(--warm); } 50% { outline-color: transparent; } }
+:root[data-skin="alt"] body.water #wm-swe { -webkit-appearance: none; appearance: none; height: 26px; background: transparent; margin: 10px 0 4px; cursor: pointer; }
+:root[data-skin="alt"] body.water #wm-swe::-webkit-slider-runnable-track {
+  height: 12px; border: 1px solid var(--frame); background: repeating-linear-gradient(90deg, var(--frame-2) 0 1px, transparent 1px 10%), var(--surface-2);
+}
+:root[data-skin="alt"] body.water #wm-swe::-moz-range-track {
+  height: 12px; border: 1px solid var(--frame); background: repeating-linear-gradient(90deg, var(--frame-2) 0 1px, transparent 1px 10%), var(--surface-2);
+}
+:root[data-skin="alt"] body.water #wm-swe::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 26px; margin-top: -8px; border: 0;
+  background: var(--snow); box-shadow: inset 0 0 0 2px var(--surface), inset 0 0 0 3px var(--snow), var(--glow);
+  clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
+}
+:root[data-skin="alt"] body.water #wm-swe::-moz-range-thumb { width: 16px; height: 26px; border: 0; border-radius: 0; background: var(--snow); clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%); }
+:root[data-skin="alt"] body.water .maplibregl-ctrl-group { border-radius: 0; background: var(--surface); box-shadow: 0 0 0 1px var(--frame); }
+:root[data-skin="alt"] body.water .maplibregl-ctrl-group button { border-radius: 0; }
+:root[data-skin="alt"] body.water .maplibregl-ctrl-group button + button { border-top: 1px solid var(--frame-2); }
+:root[data-skin="alt"] body.water .maplibregl-ctrl-attrib.maplibregl-compact { border-radius: 0; background: var(--surface); color: var(--ink-2); }
+:root[data-skin="alt"] body.water .maplibregl-ctrl-attrib a { color: inherit; }
+:root[data-skin="alt"] body.water .wm-home button { color: var(--ink); }
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="alt"]:not([data-theme="light"]) body.water :is(.maplibregl-ctrl-icon, .maplibregl-ctrl-attrib-button) { filter: invert(1) sepia(0.4) brightness(1.05); }
+}
+:root[data-skin="alt"][data-theme="dark"] body.water :is(.maplibregl-ctrl-icon, .maplibregl-ctrl-attrib-button) { filter: invert(1) sepia(0.4) brightness(1.05); }
+@media (max-width: 860px) {
+  :root[data-skin="alt"] body.water .wm-cupkey { box-shadow: none; border: 0; border-top: 3px double var(--frame-2); }
+  :root[data-skin="alt"] body.water .wmap-side { border-left: 0; border-top: 3px double var(--frame-2); }
+}
+@media (max-width: 640px) {
+  :root[data-skin="alt"] body.water .card.wmap { padding: 6px; }
+}
+
 /* ============================================================ tooltip */
 :root[data-skin="alt"] .tooltip {
   border-radius: 0; border: 1px solid var(--frame); background: var(--surface);

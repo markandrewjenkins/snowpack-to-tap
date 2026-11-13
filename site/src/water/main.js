@@ -1,12 +1,13 @@
 import * as d3 from "d3";
 import { initTheme, initSkin, cssVar, tooltip, el, tipRow, loadJSON, fmtInt } from "../shared/ui.js";
 import { skinData } from "./skin.js";
+import { initWaterMap } from "./map.js";
 
 const isDark = initTheme(document.getElementById("theme"));
 initSkin(document.getElementById("skin"));
 const tip = tooltip();
 const state = { long: "mead" };
-let W;
+let W, wm;
 
 const fmt1 = d3.format(",.1f"), fmt2 = d3.format(",.2f"), pct = (v) => `${Math.round(v * 100)}%`;
 const parse = (s) => new Date(s + "T12:00");
@@ -19,8 +20,14 @@ init().catch((err) => {
 });
 
 async function init() {
+  const mapData = loadJSON("./data/water/map.json").catch((err) => { console.warn("map data unavailable", err); return null; });
   W = await loadJSON("./data/water/water.json");
   renderTiles();
+  const M = await mapData;
+  try {
+    if (M) wm = initWaterMap({ W, M, tip, isDark, onSwe: (v) => { document.getElementById("swe").value = v; renderInflow(); } });
+  } catch (err) { console.warn("map unavailable", err); }
+  if (!wm) document.querySelector(".map-block")?.remove();   // the rest of the page works without the map
   const seg = document.getElementById("long-lake");
   for (const [k, label] of [["mead", "Lake Mead"], ["powell", "Lake Powell"]]) {
     seg.append(el("button", { type: "button", "data-k": k, "aria-pressed": k === state.long, onclick: () => {
@@ -33,7 +40,7 @@ async function init() {
   let raf, lastW = 0;
   new ResizeObserver(([e]) => { const w = Math.round(e.contentRect.width); if (w === lastW) return; lastW = w; cancelAnimationFrame(raf); raf = requestAnimationFrame(renderAll); })
     .observe(document.querySelector("main"));
-  window.addEventListener("themechange", renderAll);
+  window.addEventListener("themechange", () => { wm?.restyle(); renderAll(); });
 }
 
 function renderAll() {
@@ -47,6 +54,7 @@ function renderAll() {
   renderTeacups();
   renderCaTotal();
   renderLong();
+  wm?.applyLink();
 }
 
 // Nudge stacked right-edge labels apart so none overlap (keeps order).
@@ -162,6 +170,7 @@ function renderInflow() {
   document.getElementById("inflow-big").textContent = `${fmt1(q[3])} million acre-feet`;
   document.getElementById("inflow-sub").textContent = `April–July inflow to Lake Powell · 80% range ${fmt1(q[1])}–${fmt1(q[5])} MAF · the median year brings ${fmt1(median)} MAF (${Math.round((100 * q[3]) / median)}% of median)`;
   skinData({ inflow: { swe, med: q[3], lo: q[1], hi: q[5] } });
+  wm?.setInflow({ swe, med: q[3], lo: q[1], hi: q[5] });
   const near = m.rows.filter((r) => Math.abs(r[5] - swe) <= 0.1).sort((a, b) => Math.abs(a[5] - swe) - Math.abs(b[5] - swe)).slice(0, 5);
   document.getElementById("inflow-analogs").textContent = near.length
     ? `Years with a similar April 1 snowpack: ${near.map((r) => `${r[0]} (${Math.round(r[5] * 100)}% → ${fmt1(r[1])} MAF)`).join(", ")}.`
@@ -301,7 +310,7 @@ function renderTeacups() {
       const fa = Math.min(1, r.pct_avg_of_capacity), yy = h - ch * fa, half = (bot + (top - bot) * fa) / 2;
       svg.append("line").attr("x1", w / 2 - half - 6).attr("x2", w / 2 + half + 6).attr("y1", yy).attr("y2", yy).style("stroke", "var(--ink)").style("stroke-width", 2);
     }
-    const node = el("div", { class: "cup" }, svg.node(), el("div", { class: "n" }, r.name),
+    const node = el("div", { class: "cup", "data-res": r.id }, svg.node(), el("div", { class: "n" }, r.name),
       el("div", { class: "s" }, `${pct(r.pct_capacity)} full · ${r.pct_average ? pct(r.pct_average) : "—"} of avg`),
       el("div", { class: "s" }, `${fmt2(r.storage / 1e6)} of ${fmt2(r.capacity / 1e6)} MAF`));
     node.addEventListener("pointermove", (e) => tip.show(e.clientX, e.clientY, (t) => t.append(el("div", { class: "t-title" }, `${r.name} · ${r.date}`),

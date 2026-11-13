@@ -1,10 +1,14 @@
 """Download inputs for Snowpack to Tap.
 
-  python -m pipelines.water.fetch [rise|snotel|cdec|all]
+  python -m pipelines.water.fetch [rise|snotel|cdec|geo|all]
+
+`geo` downloads the map geometry once (basin outlines, rivers, aqueducts). It changes rarely, so `all` skips it
+when the raw files already exist.
 """
 from __future__ import annotations
 
 import io
+import json
 import sys
 import time
 from datetime import date
@@ -13,8 +17,10 @@ import pandas as pd
 import requests
 
 from pipelines.common.http import USER_AGENT, get_json
+from pipelines.common.osm import overpass
 
-from .config import AWDB, CDEC, RAW, RESERVOIR_START, RESERVOIRS, RISE_CSV, RISE_ITEMS, SNOTEL_START
+from .config import (AQUEDUCTS, AWDB, CDEC, MAP_BBOX, NE_RIVERS, RAW, RESERVOIR_START, RESERVOIRS, RISE_CSV, RISE_ITEMS,
+                     SNOTEL_START, WBD, WBD_UNITS)
 
 S = requests.Session()
 S.headers["User-Agent"] = USER_AGENT
@@ -89,9 +95,64 @@ def cdec() -> None:
     save(pd.concat(frames, ignore_index=True), "cdec_storage")
 
 
+# ============================================================================= map geometry
+
+def _write_json(obj, name: str) -> None:
+    RAW.mkdir(parents=True, exist_ok=True)
+    (RAW / name).write_text(json.dumps(obj, separators=(",", ":")), encoding="utf-8")
+    print(f"  wrote {name} ({(RAW / name).stat().st_size / 1024:,.0f} KB)", flush=True)
+
+
+def basins() -> None:
+    """Watershed Boundary Dataset outlines from the USGS National Map, generalised server-side (~1 km)."""
+    feats = []
+    for layer, field, codes in WBD_UNITS:
+        where = f"{field} IN ({','.join(repr(c) for c in codes)})"
+        d = get_json(f"{WBD}/{layer}/query", {"where": where, "outFields": f"{field},name", "returnGeometry": "true",
+                                             "outSR": 4326, "maxAllowableOffset": 0.01, "geometryPrecision": 3, "f": "geojson"},
+                     min_interval=2, timeout=180)
+        for f in d["features"]:
+            f["properties"] = {"huc": f["properties"][field], "name": f["properties"]["name"]}
+            feats.append(f)
+        print(f"  WBD layer {layer}: {[f['properties']['name'] for f in d['features']]}", flush=True)
+    _write_json({"type": "FeatureCollection", "features": feats}, "wbd_basins.geojson")
+
+
+def rivers() -> None:
+    """Natural Earth 1:10m river centrelines (public domain), trimmed to the map's bounding box."""
+    d = get_json(NE_RIVERS, timeout=300)
+    w, s, e, n = MAP_BBOX
+    def inside(f):
+        g = f.get("geometry") or {}
+        lines = g.get("coordinates", []) if g.get("type") == "MultiLineString" else [g.get("coordinates", [])]
+        return any(w <= x <= e and s <= y <= n for line in lines for x, y in line[:: max(1, len(line) // 20)])
+    feats = [f for f in d["features"] if inside(f)]
+    for f in feats:
+        f["properties"] = {k: f["properties"].get(k) for k in ("name", "name_en", "featurecla", "scalerank")}
+    _write_json({"type": "FeatureCollection", "features": feats}, "ne_rivers.geojson")
+
+
+def aqueducts() -> None:
+    """Aqueduct centrelines from OpenStreetMap (ODbL) by waterway relation, via Overpass."""
+    out = []
+    for rid, name in AQUEDUCTS.items():
+        d = overpass(f"[out:json][timeout:180];relation({rid});way(r);out geom;")
+        ways = [[[round(p["lon"], 5), round(p["lat"], 5)] for p in el["geometry"]] for el in d["elements"] if el.get("geometry")]
+        out.append({"id": rid, "name": name, "ways": ways})
+        print(f"  {name}: {len(ways)} ways", flush=True)
+        time.sleep(4)
+    _write_json(out, "aqueducts.json")
+
+
+def geo(force: bool = True) -> None:
+    for fname, fn in [("wbd_basins.geojson", basins), ("ne_rivers.geojson", rivers), ("aqueducts.json", aqueducts)]:
+        if force or not (RAW / fname).exists():
+            fn()
+
+
 if __name__ == "__main__":
     what = sys.argv[1] if len(sys.argv) > 1 else "all"
-    for name, fn in [("rise", rise), ("cdec", cdec), ("snotel", snotel)]:
+    for name, fn in [("rise", rise), ("cdec", cdec), ("snotel", snotel), ("geo", lambda: geo(force=what == "geo"))]:
         if what in (name, "all"):
             print(f"{name}…")
             fn()

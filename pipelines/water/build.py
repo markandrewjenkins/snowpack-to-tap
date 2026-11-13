@@ -14,6 +14,12 @@ Lake projections
     Analog-year ensemble: each past year's storage change from today's calendar date is applied
     to current storage and converted back to elevation with the lake's own storage–elevation
     curve. Historical operations are baked into each analog, which is the main caveat.
+Map (map.json)
+    Each long-record SNOTEL site's SWE today and on the last April 1 as % of its own 1991–2020 median for the
+    day (7-day smoothed); sites whose median is under 1 inch are "out of season". Reservoir storage vs capacity and
+    the 1991–2020 average for the date. Basin outlines (USGS WBD), rivers (Natural Earth) and aqueducts
+    (OpenStreetMap) simplified with Douglas–Peucker. Powell scenario: across the analog years, next summer's peak
+    storage regressed on that spring's April–July inflow.
 """
 from __future__ import annotations
 
@@ -23,7 +29,7 @@ from datetime import date, datetime, timedelta, timezone
 import numpy as np
 import pandas as pd
 
-from .config import ANALOG_FROM, FULL_POOL, MEAD_LEVELS, OUT, POWELL_LEVELS, RAW, RESERVOIRS
+from .config import ANALOG_FROM, FULL_POOL, LAKES, MAP_RIVERS, MEAD_LEVELS, OUT, POWELL_LEVELS, RAW, RESERVOIRS, TAPS
 
 AF_PER_CFS_DAY = 1.98347
 ISSUES = [(1, 1), (2, 1), (3, 1), (4, 1), (5, 1)]
@@ -252,6 +258,202 @@ def snow_curves(snotel: pd.DataFrame, stations: pd.DataFrame):
     return out
 
 
+# ============================================================================= map
+
+def simplify(coords, tol: float) -> np.ndarray:
+    """Douglas–Peucker on a lon/lat polyline (tolerance in degrees). Works for closed rings too."""
+    pts = np.asarray(coords, float)
+    if len(pts) < 3:
+        return pts
+    keep = np.zeros(len(pts), bool)
+    keep[0] = keep[-1] = True
+    stack = [(0, len(pts) - 1)]
+    while stack:
+        i, j = stack.pop()
+        if j <= i + 1:
+            continue
+        a, seg, sub = pts[i], pts[j] - pts[i], pts[i + 1:j]
+        L = np.hypot(*seg)
+        d = np.hypot(*(sub - a).T) if L == 0 else np.abs(seg[0] * (sub[:, 1] - a[1]) - seg[1] * (sub[:, 0] - a[0])) / L
+        k = int(np.argmax(d))
+        if d[k] > tol:
+            keep[i + 1 + k] = True
+            stack += [(i, i + 1 + k), (i + 1 + k, j)]
+    return pts[keep]
+
+
+def rnd(pts, nd: int = 3):
+    return [[round(float(x), nd), round(float(y), nd)] for x, y in pts]
+
+
+def merge_lines(ways):
+    """Chain OSM ways that share endpoints into longer lines (one greedy pass)."""
+    lines = [[tuple(p) for p in w] for w in ways if len(w) >= 2]
+    idx: dict[tuple, list[int]] = {}
+    for i, l in enumerate(lines):
+        idx.setdefault(l[0], []).append(i)
+        idx.setdefault(l[-1], []).append(i)
+    used, out = set(), []
+    for i, cur in enumerate(lines):
+        if i in used:
+            continue
+        used.add(i)
+        for forward in (True, False):
+            while True:
+                end = cur[-1] if forward else cur[0]
+                cand = [j for j in idx.get(end, []) if j not in used]
+                if not cand:
+                    break
+                used.add(cand[0])
+                m = lines[cand[0]]
+                if forward:
+                    cur = cur + (m[1:] if m[0] == end else m[::-1][1:])
+                else:
+                    cur = (m[:-1] if m[-1] == end else m[::-1][:-1]) + cur
+        out.append(cur)
+    return out
+
+
+def ring_centroid(ring):
+    x, y = np.asarray(ring, float).T
+    a = x[:-1] * y[1:] - x[1:] * y[:-1]
+    A = a.sum() / 2
+    return [round(float(((x[:-1] + x[1:]) * a).sum() / (6 * A)), 3), round(float(((y[:-1] + y[1:]) * a).sum() / (6 * A)), 3)]
+
+
+BASIN_NAMES = {"14": "Upper Colorado", "15": "Lower Colorado", "1802": "Sacramento", "1804": "San Joaquin"}
+
+
+def map_geometry():
+    fc = lambda feats: {"type": "FeatureCollection", "features": feats}
+    basins, labels = [], []
+    for f in json.loads((RAW / "wbd_basins.geojson").read_text(encoding="utf-8"))["features"]:
+        g = f["geometry"]
+        polys = [g["coordinates"]] if g["type"] == "Polygon" else g["coordinates"]
+        out = []
+        for poly in polys:
+            rings = [rnd(simplify(r, 0.012)) for r in poly]
+            rings = [r for r in rings if len(r) >= 4]
+            if rings:
+                out.append(rings)
+        huc = f["properties"]["huc"]
+        name = BASIN_NAMES.get(huc, f["properties"]["name"])
+        basins.append({"type": "Feature", "properties": {"huc": huc, "name": name, "group": "colorado" if len(huc) == 2 else "california"},
+                       "geometry": {"type": "MultiPolygon", "coordinates": out}})
+        labels.append([name, *ring_centroid(max((p[0] for p in out), key=len))])
+    rivers = []
+    for f in json.loads((RAW / "ne_rivers.geojson").read_text(encoding="utf-8"))["features"]:
+        name = f["properties"]["name"]
+        if name not in MAP_RIVERS:
+            continue
+        g = f["geometry"]
+        lines = g["coordinates"] if g["type"] == "MultiLineString" else [g["coordinates"]]
+        lines = [rnd(simplify(l, 0.008)) for l in lines]
+        rivers.append({"type": "Feature", "properties": {"name": name, "major": name in ("Colorado", "Sacramento", "San Joaquin")},
+                       "geometry": {"type": "MultiLineString", "coordinates": [l for l in lines if len(l) >= 2]}})
+    aq = []
+    for a in json.loads((RAW / "aqueducts.json").read_text(encoding="utf-8")):
+        lines = [rnd(simplify(l, 0.006)) for l in merge_lines(a["ways"])]
+        lines = [l for l in lines if len(l) >= 2 and (len(l) > 2 or l[0] != l[-1])]
+        aq.append({"type": "Feature", "properties": {"name": a["name"]}, "geometry": {"type": "MultiLineString", "coordinates": lines}})
+    return {"basins": fc(basins), "basin_labels": labels, "rivers": fc(rivers), "aqueducts": fc(aq)}
+
+
+def map_stations(snotel: pd.DataFrame, stations: pd.DataFrame):
+    """Per-site SWE vs the site's own 1991–2020 median, today and on the last April 1, plus weekly sparklines."""
+    d = snotel[snotel.element == "WTEQ"].copy()
+    d["wy"], d["wyd"] = wy(d.date), wy_day(d.date)
+    last = d.date.max()
+    cur_wy = int(last.year + (last.month >= 10))
+    apr1 = pd.Timestamp(last.year if last >= pd.Timestamp(last.year, 4, 1) else last.year - 1, 4, 1)
+    wyd_now = int(wy_day(pd.Series([last])).iloc[0])
+    wyd_apr = int(wy_day(pd.Series([apr1])).iloc[0])
+    base = d[(d.wy >= 1991) & (d.wy <= 2020)]
+    nyrs = base.groupby("station").wy.nunique()
+    med = base.groupby(["station", "wyd"]).value.median().unstack().reindex(columns=range(365))
+    med = med.T.rolling(7, center=True, min_periods=1).mean().T          # smooth day-to-day noise in the median
+    weeks = list(range(0, 365, 7))
+    tenth = lambda arr: [None if not np.isfinite(v) else int(round(v * 10)) for v in arr]
+    by_station = dict(tuple(d.groupby("station")))
+    rows, spark = [], []
+    for st in stations.itertuples():
+        sid = st.stationTriplet
+        s = by_station.get(sid)
+        ser = s.set_index("date").value if s is not None else pd.Series(dtype=float)
+        ser = ser[~ser.index.duplicated()]
+        ok = sid in med.index and nyrs.get(sid, 0) >= 20
+
+        def at(day, wyd_):
+            w = ser[(ser.index >= day - pd.Timedelta(days=3)) & (ser.index <= day)]
+            swe = float(w.iloc[-1]) if len(w) else None
+            m = float(med.loc[sid, wyd_]) if ok and pd.notna(med.loc[sid, wyd_]) else None
+            pct = swe / m if swe is not None and m is not None and m >= 1.0 else None
+            return [swe, m, pct]
+
+        rows.append([sid, st.name, round(float(st.longitude), 4), round(float(st.latitude), 4), int(st.elevation), st.basin,
+                     *at(last, wyd_now), *at(apr1, wyd_apr)])
+
+        def season(y):
+            if s is None:
+                return np.full(len(weeks), np.nan)
+            x = s[s.wy == y].set_index("wyd").value
+            return x[~x.index.duplicated()].reindex(range(365)).loc[weeks].to_numpy(float)
+
+        m_w = med.loc[sid, weeks].to_numpy(float) if ok else np.full(len(weeks), np.nan)
+        spark.append([tenth(m_w), tenth(season(cur_wy - 1)), tenth(season(cur_wy))])
+    print(f"  map stations: {len(rows)}; ranked on {last.date()}: {sum(r[8] is not None for r in rows)}, "
+          f"on {apr1.date()}: {sum(r[11] is not None for r in rows)}")
+    return {"date": last, "apr1": apr1, "wy": cur_wy, "weeks": weeks,
+            "cols": ["id", "name", "lon", "lat", "elev_ft", "basin", "swe", "median", "pct", "swe_apr1", "median_apr1", "pct_apr1"],
+            "rows": rows, "spark": spark}
+
+
+def lake_reservoirs(rise: pd.DataFrame):
+    out = []
+    for lake, (name, cap, lon, lat) in LAKES.items():
+        st = rise[rise.series == f"{lake}_storage"].set_index("date").value
+        st = st[~st.index.duplicated()].dropna()
+        el = rise[rise.series == f"{lake}_elev"].set_index("date").value.dropna()
+        last = st.index.max()
+        hist = st[(st.index.year >= 1991) & (st.index.year <= 2020)]
+        avg = float(hist[np.abs(hist.index.dayofyear - last.dayofyear) <= 3].mean())
+        s = float(st[last])
+        out.append({"id": lake, "name": name, "capacity": cap, "lon": lon, "lat": lat, "date": last.date().isoformat(),
+                    "storage": s, "pct_capacity": s / cap, "pct_average": s / avg, "avg_for_date": avg, "pct_avg_of_capacity": avg / cap,
+                    "elev": float(el.iloc[-1]), "full_pool": FULL_POOL[lake], "region": "colorado"})
+    return out
+
+
+def powell_scenario(rise: pd.DataFrame, vols: pd.DataFrame):
+    """Across analog years, next summer's peak Powell storage vs that spring's April–July unregulated inflow."""
+    st = rise[rise.series == "powell_storage"].set_index("date").value
+    st = st[~st.index.duplicated()].asfreq("D").interpolate(limit=5)
+    today = st.dropna().index.max()
+    s0 = float(st[today])
+    lag = 1 if today.month >= 8 else 0          # which spring is "next": this calendar year until July, then next year's
+    v = dict(zip(vols.wy, vols.aprjul))
+    xs, ys = [], []
+    for y in range(ANALOG_FROM, today.year):
+        start = today.replace(year=y)
+        seg = st[start:start + pd.Timedelta(days=365)]
+        if len(seg) < 340 or seg.isna().mean() > 0.05:
+            continue
+        spring = seg[(seg.index.year == y + lag) & (seg.index.month >= 4) & (seg.index.month <= 8)]
+        if spring.empty or not np.isfinite(v.get(y + lag, np.nan)):
+            continue
+        xs.append(v[y + lag])
+        ys.append(s0 + float((spring - seg.iloc[0]).max()))
+    xs, ys = np.array(xs), np.array(ys)
+    b, a = np.polyfit(xs, ys, 1)
+    r2 = float(np.corrcoef(xs, ys)[0, 1] ** 2)
+    res = ys - (a + b * xs)
+    cs, ce = stage_curve(rise, "powell")
+    k = np.unique(np.linspace(0, len(cs) - 1, 32).round().astype(int))
+    print(f"  powell scenario: n={len(xs)} peak storage = {a / 1e6:.2f} + {b:.3f} × inflow (MAF), R² {r2:.2f}")
+    return {"n": int(len(xs)), "a": float(a), "b": float(b), "r2": r2, "res_q": np.quantile(res, [0.1, 0.9]).tolist(),
+            "spring_year": int(today.year + lag), "storage_now": s0, "inflow_range": [float(xs.min()), float(xs.max())], "stage": [[float(cs[i]), float(ce[i])] for i in k]}
+
+
 # ============================================================================= main
 
 def main():
@@ -306,14 +508,22 @@ def main():
         el = rise[rise.series == f"{lake}_elev"].set_index("date").value
         rise_hist[lake] = [[d_.date().isoformat(), round(float(v), 1)] for d_, v in el.resample("MS").mean().dropna().items()]
 
+    ca = california(cdec)
     dump("water.json", {
         "generated": gen, "status": status, "inflow_model": model,
         "volumes": [[int(r.wy), r.aprjul, r.base] for r in vols.itertuples()],
         "projections": proj, "risk": risk, "levels": {"mead": MEAD_LEVELS, "powell": POWELL_LEVELS}, "full_pool": FULL_POOL,
         "lake_history": rise_hist,
         "snow_curves": snow_curves(snotel, stations),
-        "california": california(cdec),
+        "california": ca,
         "stations": stations[["stationTriplet", "name", "latitude", "longitude", "basin", "elevation"]].values.tolist(),
+    })
+
+    dump("map.json", {
+        "generated": gen, **map_geometry(), "taps": TAPS,
+        "snow": map_stations(snotel, stations),
+        "reservoirs": lake_reservoirs(rise) + [{**r, "region": "california"} for r in ca["reservoirs"]],
+        "powell_scenario": {**powell_scenario(rise, vols), "capacity": LAKES["powell"][1]},
     })
 
 

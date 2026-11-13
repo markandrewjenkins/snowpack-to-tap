@@ -16,6 +16,14 @@ to GitHub Pages.
   - April 1: R² 0.70, mean absolute error 1.28 MAF vs 2.60 MAF for climatology. Nested 80% intervals cover 75%.
 - **Lake projections:** An analog ensemble of 2000–2025 storage changes applied to today's storage and converted with each lake's recent storage–elevation curve. The output is the odds of crossing the 2007-guideline tier lines and Powell's minimum power pool.
 - **California:** CDEC daily storage for the 12 largest reservoirs against their 1991–2020 average for the date.
+- **Journey map:** One map from snowpack to taps, built into `site/public/data/water/map.json` (~130 KB) by `build.py`.
+  - Each long-record SNOTEL site is coloured by SWE as a share of its own 1991–2020 median for the day (7-day smoothed), for the latest day and for the last April 1. Sites whose median is under 1″ count as out of season. The tooltip sparkline shows the season against the median.
+  - Reservoirs are cups filled to storage/capacity, with a bar at the 1991–2020 average for the date. Powell and Mead come from RISE. Their dam coordinates and full-pool capacities are in `config.py`, with a source note.
+  - The scenario slider is shared with the inflow forecaster. Across the analog years, next summer's peak Powell storage is regressed on that spring's April–July inflow (R² ≈ 0.9). The fit then gives the forecast inflow's peak level, with operations baked in as for the projections.
+  - Geometry is fetched once by `python -m pipelines.water.fetch geo` and simplified with Douglas–Peucker in the build:
+    - basins: USGS Watershed Boundary Dataset (HUC 14, 15, 1802, 1804), from the National Map `wbd` MapServer;
+    - rivers: Natural Earth 1:10m;
+    - aqueducts: OpenStreetMap waterway relations through Overpass (California Aqueduct, Colorado River Aqueduct, Central Arizona Project).
 
 ## Design
 
